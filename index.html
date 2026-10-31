@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Where Is My Bus</title>
+    <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f8fafc;color:#111827;font:16px/1.5 system-ui,sans-serif;padding:2px}
+    main{width:min(760px,100%)}h1{font-size:clamp(28px,5vw,42px);letter-spacing:-.04em;margin:0 0 8px}p{color:#667085}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:2px}
+    a{display:block;padding:22px;background:white;border:1px solid #e5e7eb;border-radius:16px;color:#111827;text-decoration:none;font-weight:750;box-shadow:0 8px 24px #0f172a0a}
+    a:hover{border-color:#2563eb;transform:translateY(-2px)}small{display:block;font-weight:400;color:#667085;margin-top:7px}
+  </style>
+  </head>
+  <body><main><h1>Where Is My Bus?</h1><p>Choose the
+        portal you want to open.</p><div class="grid">
+        <a href="student.html">Student portal</a>
+        <a href="driver.html">Driver portal</a>
+        <a href="management.html">Management portal</a>
+      </div></main>
+    <script
+      src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script
+      src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="firebase.js"></script></body></html>
