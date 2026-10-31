@@ -1,68 +1,284 @@
-<!doctype html>
-<html lang="en" class="portal-driver">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
-  <title>Where Is My Bus — Driver Portal</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Portal</title>
+
   <link rel="stylesheet" href="driver.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
-  <div id="loginScreen" class="login-shell">
-    <section class="login-card">
-      <div class="brand-mark">W</div>
-      <p class="eyebrow">COLLEGE TRANSPORT</p>
-      <h1>Where Is My Bus?</h1>
-      <p class="muted">Sign in to view your route, pickup point and transport updates.</p>
+<body class="portal-driver">
+
+ 
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      
+      <p class="login-tag">WHERE IS MY BUS</p>
+      <h1>Driver Login</h1>
+     
+
       <form id="loginForm">
-        <label>Username<input id="username" autocomplete="username" required placeholder="Enter username"></label>
-        <label>Password<input id="password" type="password" autocomplete="current-password" required placeholder="Enter password"></label>
-        <p id="loginError" class="error" role="alert"></p>
-        <button class="btn primary full" type="submit">Sign in</button>
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+
+        <p class="login-error" id="loginError"></p>
+        <button type="submit" class="primary-btn login-btn">Sign In</button>
       </form>
-      <div class="demo-box"><b>Demo credentials</b><p>Driver: <code>driver</code> / <code>driver123</code></p></div>
-    </section>
-  </div>
 
-  <div id="appScreen" class="hidden">
-    <header class="topbar">
-      <a class="brand" href="#"><span class="brand-mark small-mark">W</span><span>Where Is My Bus<small>COLLEGE TRANSIT</small></span></a>
-      <div class="top-user"><span id="userBadge" class="user-badge">S</span><span><b id="userName">Student</b><small id="userRole">Student account</small></span><button id="logoutBtn" class="btn light">Log out</button></div>
-    </header>
+      <div class="demo-login">
+        Demo login: <strong>driver</strong> / <strong>driver123</strong>
+      </div>
+    </div>
+  </section>
 
+  
+  <div class="app-screen" id="appScreen" style="display:none;">
+
+    
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">W</div>
+        <div>
+          <h2>Where Is My Bus</h2>
+          <span>Driver Portal</span>
+        </div>
+      </div>
+
+      <div class="sidebar-profile">
+        <div class="profile-avatar" id="sidebarAvatar">D</div>
+        <div>
+          <strong id="sidebarName">Driver</strong>
+          <span>Bus Driver</span>
+        </div>
+      </div>
+
+      <p class="nav-heading">MENU</p>
+      <nav class="sidebar-nav">
+        <a href="#dashboardSection" class="nav-link active">
+          <span class="nav-icon">▦</span> Dashboard
+        </a>
+        <a href="#routeSection" class="nav-link">
+          <span class="nav-icon">⌖</span> My Route
+        </a>
+        <a href="#pickupSection" class="nav-link">
+          <span class="nav-icon">♧</span> Pickup Points
+        </a>
+        <a href="#noticeSection" class="nav-link">
+          <span class="nav-icon">✉</span> Send Notice
+        </a>
+        <a href="#announcementSection" class="nav-link">
+          <span class="nav-icon">◉</span> Announcements
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+       
+        <button class="logout-btn" id="logoutBtn">
+           Logout
+        </button>
+      </div>
+    </aside>
+
+    
     <main class="main-content">
-      <section id="studentPage" class="hidden">
-        <div class="page-heading"><div><p class="eyebrow">STUDENT PORTAL</p><h1>Find your bus</h1><p class="muted">Search your destination to see route details and driver updates.</p></div></div>
-        <section class="panel search-panel"><label for="routeSearch">Search bus route</label><div class="search-row"><span>⌕</span><input id="routeSearch" placeholder="Try Sehore, Bhopal or a stop name"><button id="clearSearch" class="btn light">Clear</button></div><div id="routeResults" class="route-results"></div></section>
-        <div class="student-grid">
-          <section class="panel"><div class="panel-heading"><div><h2>Route map</h2><p class="muted">Your selected route and its road path</p></div><span class="pill blue-pill">Route view</span></div><div id="studentMap" class="map"></div><p class="map-note">Other students' private pickup pins are never shown here.</p></section>
-          <div class="stack">
-            <section class="panel" id="routeDetails"><h2>Choose a route</h2><p class="muted">Search for a destination to see bus timings, stops and driver contact details.</p></section>
-            <section class="panel"><div class="panel-heading"><div><h2>Management announcements</h2><p class="muted">Official updates from college management for your selected route</p></div></div><div id="studentManagementNotices" class="notice-list"><p class="empty">Select a route to view management announcements.</p></div></section>
-          <section class="panel"><div class="panel-heading"><div><h2>Driver notices</h2><p class="muted">Messages for your selected route</p></div></div><div id="studentNotices" class="notice-list"><p class="muted">Select a route to view notices.</p></div></section>
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+          <div>
+            <p class="topbar-date">DRIVER WORKSPACE</p>
+            <h1>Driver Dashboard</h1>
           </div>
         </div>
-        <section class="panel pickup-panel"><div class="panel-heading"><div><p class="eyebrow">PRIVATE PICKUP POINT</p><h2>Request your pickup point</h2><p class="muted">Drag the pin to a point on the highlighted route. The pin snaps to the route line.</p></div></div><div class="pickup-grid"><div><div id="pickupMap" class="map pickup-map"></div><div class="map-actions"><button id="resetPinBtn" class="btn light">Reset pin</button><button id="savePickupBtn" class="btn primary">Save pickup request</button></div><p id="pickupMessage" class="form-message" role="status"></p></div><form id="pickupForm" class="form-stack"><label>Pickup label<input id="pickupLabel" required maxlength="60" placeholder="e.g. Near main market"></label><label>Landmark / instructions<textarea id="pickupLandmark" rows="3" maxlength="250" placeholder="Add a nearby landmark (optional)"></textarea></label><div class="privacy-note"><b>Privacy</b><p>Your pickup location is visible only to the driver assigned to this route in this demo. Other students cannot view it.</p></div><div id="myPickup" class="my-pickup muted">You have not submitted a pickup point.</div></form></div></section>
-      </section>
+        <div class="topbar-user">
+          <div class="topbar-avatar" id="topbarAvatar">D</div>
+          <div>
+            <strong id="userName">Driver</strong>
+            <span id="userRole">Bus Driver</span>
+          </div>
+        </div>
+      </header>
 
-      <section id="driverPage" class="hidden">
-        <div class="page-heading"><div><p class="eyebrow">DRIVER PORTAL</p><h1>Route control</h1><p class="muted">See pickup requests for your assigned route and send route-specific notices.</p></div><span class="pill green-pill">Driver account</span></div>
-        <div class="driver-grid"><section class="panel"><div class="panel-heading"><div><h2 id="driverRouteTitle">Your route</h2><p class="muted">Only pickup points assigned to your route are displayed.</p></div></div><div id="driverMap" class="map driver-map"></div><div id="driverRouteInfo" class="driver-route-info"></div></section>
-          <div class="stack"><section class="panel"><div class="panel-heading"><div><h2>Pickup requests</h2><p class="muted">Private to this route's driver</p></div><span id="pickupCount" class="count-badge">0</span></div><div id="driverPickups" class="pickup-list"></div></section>
-          <section class="panel"><h2>Send route notice</h2><p class="muted">Only students on your assigned route will see this message.</p><form id="noticeForm" class="form-stack"><label>Notice title<input id="noticeTitle" required maxlength="80" placeholder="e.g. Bus delayed by 10 minutes"></label><label>Message<textarea id="noticeBody" rows="3" required maxlength="500" placeholder="Write an update for your students"></textarea></label><button class="btn primary" type="submit">Send notice</button><p id="noticeFeedback" class="form-message" role="status"></p></form></section>
-          <section class="panel"><div class="panel-heading"><div><h2>Management announcements</h2><p class="muted">Official updates from college management for your route</p></div></div><div id="driverManagementNotices" class="notice-list"><p class="empty">No management announcements yet.</p></div></section>
-          <section class="panel"><h2>Sent notices</h2><div id="driverNotices" class="notice-list"></div></section></div></div>
-      </section>
-      <footer>Where Is My Bus <span>•</span> Demo project <span class="footer-note">Sample routes and locations. Not a live transport service.</span></footer>
+      <div class="content-area">
+
+        <section class="welcome-banner" id="dashboardSection">
+          <div>
+            <span class="welcome-label">WELCOME BACK</span>
+            <h2>Hello, <span id="welcomeName">Driver</span>!</h2>
+            <p>Here is your route information and today's pickup activity.</p>
+          </div>
+          <div class="welcome-symbol">🚌</div>
+        </section>
+
+        <div class="status-message" id="routeStatus">
+          Loading your assigned route...
+        </div>
+
+        <!-- Statistics -->
+        <section class="stats-grid">
+          <article class="stat-card">
+            <div class="stat-icon red-icon">🚌</div>
+            <div>
+              <span>Assigned Bus</span>
+              <h2 id="busNumber">--</h2>
+              <small id="busModel">Bus details</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon blue-icon">⌖</div>
+            <div>
+              <span>Route</span>
+              <h2 id="routeName">Not assigned</h2>
+              <small id="routeCode">Route details</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon orange-icon">♧</div>
+            <div>
+              <span>Student Pickups</span>
+              <h2 id="pickupCount">0</h2>
+              <small>On your assigned route</small>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <div class="stat-icon green-icon">◷</div>
+            <div>
+              <span>Departure Time</span>
+              <h2 id="departureTime">--</h2>
+              <small id="arrivalTime">Arrival: --</small>
+            </div>
+          </article>
+        </section>
+
+        <!-- Route -->
+        <section class="content-card" id="routeSection">
+          <div class="section-heading">
+            <div>
+              <span class="section-label">YOUR ASSIGNMENT</span>
+              <h2>Route Overview</h2>
+              <p id="driverRouteTitle">Your assigned bus route will appear here.</p>
+            </div>
+            <span class="live-status"><span></span> Assigned Route</span>
+          </div>
+
+          <div class="route-info-grid" id="driverRouteInfo">
+            <div class="route-info-item">
+              <span>Starting Point</span>
+              <strong>--</strong>
+            </div>
+            <div class="route-info-item">
+              <span>Destination</span>
+              <strong>--</strong>
+            </div>
+            <div class="route-info-item">
+              <span>Total Distance</span>
+              <strong>--</strong>
+            </div>
+            <div class="route-info-item">
+              <span>Driver Contact</span>
+              <strong>--</strong>
+            </div>
+          </div>
+
+          <div class="map-heading">
+            <h3>Route Map</h3>
+            <span>Route and student pickup locations</span>
+          </div>
+          <div id="driverMap" class="driver-map"></div>
+        </section>
+
+        <!-- Pickup points -->
+        <section class="content-card" id="pickupSection">
+          <div class="section-heading">
+            <div>
+              <span class="section-label">STUDENT LOCATIONS</span>
+              <h2>Student Pickup Points</h2>
+              <p>Pickup locations submitted by students on your route.</p>
+            </div>
+            <span class="count-pill" id="pickupCountLabel">0 Pickups</span>
+          </div>
+
+          <div class="pickup-list" id="driverPickups">
+            <div class="empty-state">No pickup points available yet.</div>
+          </div>
+        </section>
+
+        <!-- Send notice -->
+        <section class="content-card" id="noticeSection">
+          <div class="section-heading">
+            <div>
+              <span class="section-label">COMMUNICATION</span>
+              <h2>Send Notice to Students</h2>
+              <p>Send route updates, delays, or important information.</p>
+            </div>
+          </div>
+
+          <form id="noticeForm" class="notice-form">
+            <div class="form-group">
+              <label for="noticeTitle">Notice Title</label>
+              <input type="text" id="noticeTitle" placeholder="Example: Bus running late" required>
+            </div>
+
+            <div class="form-group">
+              <label for="noticeBody">Message</label>
+              <textarea id="noticeBody" rows="4" placeholder="Write your message for students..." required></textarea>
+            </div>
+
+            <button type="submit" class="primary-btn">Send Notice</button>
+            <p id="noticeFeedback" class="form-feedback"></p>
+          </form>
+
+          <div class="sent-notices">
+            <h3>Notices Sent by You</h3>
+            <div id="driverNotices">
+              <div class="empty-state">No notices sent yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Management announcements -->
+        <section class="content-card" id="announcementSection">
+          <div class="section-heading">
+            <div>
+              <span class="section-label">IMPORTANT UPDATES</span>
+              <h2>Management Announcements</h2>
+              <p>Messages and instructions from the management team.</p>
+            </div>
+          </div>
+
+          <div id="driverManagementNotices">
+            <div class="empty-state">No announcements available.</div>
+          </div>
+        </section>
+
+        <footer class="page-footer">
+          <p>Where Is My Bus · Driver Portal</p>
+        </footer>
+
+      </div>
     </main>
   </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-<script src="firebase.js"></script>
-    <script src="cloud-sync.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script src="firebase.js"></script>
+  <script src="cloud-sync.js"></script>
   <script src="data.js"></script>
   <script src="driver.js"></script>
+
 </body>
 </html>

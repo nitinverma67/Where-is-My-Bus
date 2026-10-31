@@ -1,6 +1,4 @@
-/* Where Is My Bus - Firebase Realtime Database sync bridge.
-   Syncs shared app data, notices and pickup requests across devices.
-   User sessions intentionally remain local to this browser. */
+
 (function () {
   'use strict';
   if (!window.firebase || !window.database) {
