@@ -716,12 +716,16 @@ textarea {
 /* MAPS */
 
 .map {
+  position: relative;
+  display: block;
   height: 430px;
+  min-height: 300px;
   width: 100%;
   border-radius: 15px;
   background: #e9eef5;
   overflow: hidden;
-  z-index: 1;
+  isolation: isolate;
+  z-index: auto;
 }
 
 .pickup-map {
@@ -738,8 +742,29 @@ textarea {
   margin: 10px 0 0;
 }
 
+.leaflet-container img,
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+}
+
 .leaflet-container {
   font: inherit;
+  width: 100%;
+  height: 100%;
+  background: #e9eef5;
+  outline: 0;
+}
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: auto;
+}
+.leaflet-control {
+  z-index: 800;
+}
+.leaflet-tile {
+  visibility: visible !important;
 }
 
 .leaflet-control-attribution {
