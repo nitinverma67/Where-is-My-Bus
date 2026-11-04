@@ -27,6 +27,11 @@
   let driverMap = null;
   let routeLayer = null;
   let pickupLayer = null;
+  let driverGpsWatchId = null;
+  let driverBusMarker = null;
+  let roadRoutePath = [];
+  let driverGpsStatus = null;
+  let roadRouteLoadedFor = "";
 
   function readStorage(key, fallback = []) {
     try {
@@ -476,6 +481,11 @@
 
     routeLayer = L.layerGroup().addTo(driverMap);
     pickupLayer = L.layerGroup().addTo(driverMap);
+    driverGpsStatus = document.createElement('p');
+    driverGpsStatus.id = 'driverGpsStatus';
+    driverGpsStatus.className = 'map-note';
+    driverGpsStatus.textContent = 'GPS tracking is not started.';
+    document.getElementById('driverMap').insertAdjacentElement('afterend', driverGpsStatus);
   }
 
   function renderDriverMap() {
@@ -491,7 +501,20 @@
       return;
     }
 
-    const path = getRoutePath(driverRoute);
+    const stopPath = getRoutePath(driverRoute);
+    const routeKey = String(driverRoute.id);
+    if (roadRouteLoadedFor !== routeKey) roadRoutePath = stopPath;
+    if (stopPath.length >= 2 && window.WIMBMapServices?.getRoadRoute && roadRouteLoadedFor !== routeKey) {
+      roadRouteLoadedFor = routeKey;
+      window.WIMBMapServices.getRoadRoute(stopPath).then(result => {
+        if (!driverMap || !driverRoute) return;
+        roadRoutePath = result.path;
+        renderDriverMap();
+        const distanceValue = document.querySelector('#driverRouteInfo .route-info-item:nth-child(3) strong');
+        if (distanceValue) distanceValue.textContent = `${result.distanceKm.toFixed(1)} km (road)`;
+      }).catch(error => console.warn('[WIMB] Driver road route unavailable:', error));
+    }
+    const path = roadRoutePath;
 
     if (path.length) {
       const line = L.polyline(path, {
@@ -541,6 +564,47 @@
     setTimeout(() => driverMap.invalidateSize(), 150);
   }
 
+  function stopDriverGpsTracking() {
+    if (driverGpsWatchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(driverGpsWatchId);
+    driverGpsWatchId = null;
+  }
+
+  function startDriverGpsTracking() {
+    if (driverGpsWatchId !== null) return;
+    if (!currentUser || !driverRoute || !driverBus?.id) {
+      if (driverGpsStatus) driverGpsStatus.textContent = 'No assigned bus found. GPS tracking cannot start.';
+      return;
+    }
+    if (!window.isSecureContext || !navigator.geolocation) {
+      if (driverGpsStatus) driverGpsStatus.textContent = 'GPS requires HTTPS and browser location permission.';
+      return;
+    }
+    if (driverGpsStatus) driverGpsStatus.textContent = 'Requesting phone GPS permission…';
+    driverGpsWatchId = navigator.geolocation.watchPosition(position => {
+      const coords = position.coords;
+      const payload = {
+        busId: String(driverBus.id), routeId: String(driverRoute.id),
+        driverName: currentUser.name || 'Driver',
+        lat: coords.latitude, lng: coords.longitude,
+        accuracy: coords.accuracy, speed: coords.speed, heading: coords.heading,
+        timestamp: Date.now()
+      };
+      window.database.ref(`liveBusLocations/${driverBus.id}`).set(payload).then(() => {
+        if (driverGpsStatus) driverGpsStatus.textContent = `GPS active · accuracy ±${Math.round(coords.accuracy)} m · updated ${new Date(payload.timestamp).toLocaleTimeString()}`;
+        if (driverMap) {
+          if (!driverBusMarker) driverBusMarker = L.marker([payload.lat, payload.lng], { title: 'Your live bus location' }).addTo(driverMap);
+          else driverBusMarker.setLatLng([payload.lat, payload.lng]);
+        }
+      }).catch(error => {
+        console.error('[WIMB] GPS write failed:', error);
+        if (driverGpsStatus) driverGpsStatus.textContent = 'GPS captured, but Firebase rejected the update. Check database rules.';
+      });
+    }, error => {
+      const messages = { 1: 'Location permission denied. Allow location access in browser settings.', 2: 'Phone GPS position is unavailable. Try moving outdoors.', 3: 'GPS request timed out. Waiting for another location update.' };
+      if (driverGpsStatus) driverGpsStatus.textContent = messages[error.code] || 'Unable to read phone GPS.';
+    }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000 });
+  }
+
   function renderDriver() {
     loadAppData();
 
@@ -553,6 +617,7 @@
     renderNotices();
     renderManagementAnnouncements();
     renderDriverMap();
+    startDriverGpsTracking();
   }
 
   function sendNotice(event) {
@@ -642,6 +707,10 @@
   }
 
   function logout() {
+    stopDriverGpsTracking();
+    if (driverBus?.id && window.database) {
+      window.database.ref(`liveBusLocations/${driverBus.id}/status`).set('offline').catch(() => {});
+    }
     localStorage.removeItem(DB_KEYS.session);
     currentUser = null;
     driverRoute = null;
