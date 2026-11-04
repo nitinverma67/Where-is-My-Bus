@@ -705,3 +705,44 @@ textarea {
     flex-direction: column;
   }
 }
+/* Management portal: yellow/gold theme */
+:root { --blue:#d69e00; --soft:#fff8df; --bg:#faf9f5; --ink:#29261d; --muted:#777264; --line:#eee7d2; }
+.brand-mark { background:linear-gradient(145deg,#f5c542,#d69e00); color:#342800; box-shadow:0 8px 18px #d69e0030; }
+.primary-btn { background:#d69e00; color:#241c00; }
+.primary-btn:hover { background:#bd8b00; }
+.menu-toggle span { background:#66551d; }
+.menu-nav .nav-item.active, .menu-nav .nav-item:hover { background:#fff4c7; color:#725400; }
+.eyebrow { color:#a77a00; }
+input:focus, select:focus, textarea:focus { border-color:#d6a514; box-shadow:0 0 0 3px #d69e0018; }
+/* Dashboard is intentionally a short overview; detailed work lives in its own pages. */
+#homePage .content-grid { display:none; }
+#homePage > .panel { display:none; }
+.page-view { min-width:0; }
+.main-content { min-width:0; }
+.management-map { width:100%; height:clamp(320px,58vh,620px); min-height:280px; border-radius:14px; overflow:hidden; }
+.panel { padding:clamp(16px,2vw,24px); }
+.page-heading { margin-bottom:18px; }
+.stats { gap:14px; }
+.stat-card { min-width:0; }
+@media(max-width:900px) {
+ .topbar { padding-inline:16px; }
+ .main-content { margin-left:0; width:100%; }
+}
+@media(max-width:650px) {
+ .topbar { height:66px; padding:0 12px; }
+ .brand-copy span { font-size:8px; }
+ .manager-label { display:none; }
+ .main-content { padding:16px 12px 28px; }
+ .page-heading h1 { font-size:25px; }
+ .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .stat-card { padding:13px; }
+ .management-map { height:340px; min-height:270px; }
+ .form-grid { grid-template-columns:1fr; }
+ .panel { padding:15px; }
+}
+@media(max-width:380px) { .stats { grid-template-columns:1fr; } }
+/* Keep the drawer above Leaflet panes and remove the unused left gutter. */
+.main-content { padding:24px clamp(14px,3vw,36px) 40px; }
+.side-menu { z-index:1100; }
+.menu-backdrop { z-index:1090; }
+.topbar { z-index:1110; }

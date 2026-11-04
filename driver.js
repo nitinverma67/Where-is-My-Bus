@@ -111,16 +111,12 @@
     }
 
     // Match the logged-in driver with a driver record.
+    const loggedInName = String(currentUser.name || "").trim().toLowerCase();
+    const loggedInUsername = String(currentUser.username || "").trim().toLowerCase();
     const driverRecord = drivers.find(driver =>
-      (driver.username && String(driver.username).toLowerCase() ===
-        String(currentUser.username || "").toLowerCase()) ||
-      (currentUser.driverId && String(driver.id || "") === String(currentUser.driverId)) ||
-      // The demo driver login represents Rajesh Sharma. Management assigns
-      // the route through the driver's name, so resolve that record too.
-      (driver.name && String(driver.name).trim().toLowerCase() ===
-        String(currentUser.name || "").trim().toLowerCase()) ||
-      (driver.driverName && String(driver.driverName).trim().toLowerCase() ===
-        String(currentUser.name || "").trim().toLowerCase())
+      String(driver.username || "").trim().toLowerCase() === loggedInUsername ||
+      String(driver.id || "") === String(currentUser.driverId || "") ||
+      String(driver.name || driver.driverName || "").trim().toLowerCase() === loggedInName
     );
 
     const driverIds = [
@@ -128,18 +124,16 @@
       driverRecord?.id,
       currentUser.username,
       currentUser.name,
-      driverRecord?.assignedBusId,
-      driverRecord?.busId
+      driverRecord?.name,
+      driverRecord?.driverName
     ].filter(Boolean).map(String);
 
     // Find a bus assigned to this driver.
     let assignedBus = buses.find(bus =>
       driverIds.includes(String(bus.assignedDriverId || "")) ||
-      driverIds.includes(String(bus.id || "")) &&
-        [driverRecord?.assignedBusId, driverRecord?.busId].filter(Boolean)
-          .map(String).includes(String(bus.id)) ||
-      String(bus.driverName || bus.assignedDriverName || "").trim().toLowerCase() ===
-        String(currentUser.name || "").trim().toLowerCase()
+      String(bus.driverName || "").trim().toLowerCase() ===
+        String(currentUser.name || "").trim().toLowerCase() ||
+      (driverRecord && String(bus.assignedDriverId || "") === String(driverRecord.id || ""))
     );
 
     // If there is only one bus and it has no driver assignment,
@@ -549,14 +543,7 @@
         .addTo(pickupLayer);
     });
 
-    const refreshMapSize = () => {
-      if (!driverMap) return;
-      requestAnimationFrame(() => driverMap.invalidateSize({ pan: false }));
-    };
-    setTimeout(refreshMapSize, 100);
-    setTimeout(refreshMapSize, 350);
-    driverMap.off("zoomend", refreshMapSize);
-    driverMap.on("zoomend", refreshMapSize);
+    setTimeout(() => driverMap.invalidateSize(), 150);
   }
 
   function renderDriver() {
@@ -721,16 +708,6 @@
   }
 
   function setupLiveUpdates() {
-    const refreshDriverMap = () => {
-      if (driverMap) {
-        setTimeout(() => driverMap && driverMap.invalidateSize({ pan: false }), 120);
-      }
-    };
-    window.addEventListener("resize", refreshDriverMap);
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) refreshDriverMap();
-    });
-
     window.addEventListener("storage", event => {
       if (
         !event.key ||

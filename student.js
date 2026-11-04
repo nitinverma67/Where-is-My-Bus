@@ -528,15 +528,8 @@
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      updateWhenZooming: false,
-      updateWhenIdle: true,
-      keepBuffer: 4,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
-    map.on('zoomend moveend', () => {
-      setTimeout(() => map.invalidateSize({ pan: false }), 80);
-    });
 
     return map;
   }
@@ -1067,20 +1060,6 @@
     if ([DB_KEYS.notices, DB_KEYS.pickups, DB_KEYS.management].includes(event.key)) {
       window.dispatchEvent(new CustomEvent('wimb:data-updated', { detail: { key: event.key } }));
     }
-  });
-
-  // Keep Leaflet tiles correctly sized after sidebar changes, zooming,
-  // browser resizing, or switching back to this tab.
-  const refreshVisibleMaps = () => {
-    setTimeout(() => {
-      [studentMap, driverMap].forEach(map => {
-        if (map) map.invalidateSize({ pan: false });
-      });
-    }, 180);
-  };
-  window.addEventListener('resize', refreshVisibleMaps);
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) refreshVisibleMaps();
   });
 
   // STUDENT DASHBOARD UI HELPERS

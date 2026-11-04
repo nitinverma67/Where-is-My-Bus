@@ -649,27 +649,12 @@ button {
 }
 
 .driver-map {
-  position: relative;
-  display: block;
   height: 390px;
-  min-height: 300px;
   width: 100%;
   border-radius: 9px;
   border: 1px solid var(--border);
   background: #f1f1f1;
-  overflow: hidden;
-  isolation: isolate;
-}
-.driver-map .leaflet-container img,
-.leaflet-tile {
-  max-width: none !important;
-  max-height: none !important;
-}
-
-.leaflet-container {
-  width: 100%;
-  height: 100%;
-  background: #f1f1f1;
+  z-index: 1;
 }
 
 /* PICKUPS */

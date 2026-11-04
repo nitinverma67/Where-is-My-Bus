@@ -464,17 +464,6 @@
     const bus = getBus(assignedBusId);
     if (bus) {
       bus.assignedRouteId = route.id;
-      // Keep both sides of the route/bus relationship in sync.
-      route.assignedBusId = bus.id;
-      const assignedDriver = getDriverForBus(bus);
-      if (assignedDriver) {
-        route.assignedDriverId = assignedDriver.id;
-        bus.driverName = assignedDriver.name || bus.driverName || "";
-        bus.driverPhone = assignedDriver.phone || bus.driverPhone || "";
-      }
-    } else {
-      route.assignedBusId = "";
-      delete route.assignedDriverId;
     }
 
     if (saveData()) {
@@ -572,18 +561,6 @@
     bus.assignedDriverId = driver.id;
     bus.driverName = name;
     bus.driverPhone = phone;
-
-    // Store the driver's current route on the driver record as well.
-    const linkedRoute = routes.find(route =>
-      text(route.assignedBusId) === text(bus.id) ||
-      text(route.id) === text(bus.assignedRouteId)
-    );
-    if (linkedRoute) {
-      driver.routeId = linkedRoute.id;
-      driver.assignedRouteId = linkedRoute.id;
-      linkedRoute.assignedBusId = bus.id;
-      linkedRoute.assignedDriverId = driver.id;
-    }
 
     if (saveData()) {
       renderAll();
@@ -816,6 +793,16 @@
       event.target.value = "";
     });
   }
+
+  window.addEventListener("wimb:data-updated", event => {
+    if (event.detail?.key !== KEYS.data) return;
+    const refreshed = loadSavedData();
+    routes = refreshed.routes;
+    buses = refreshed.buses;
+    drivers = refreshed.drivers;
+    data = refreshed;
+    renderAll();
+  });
 
   function initialize() {
     setVisible($("#logoutBtn"), false);

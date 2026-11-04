@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bus Management Portal</title>
   <link rel="stylesheet" href="management.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body>
 
@@ -85,6 +86,9 @@
         <button class="nav-item" data-page="mapPage" type="button">
           ⌖　Live Map
         </button>
+        <button class="nav-item" data-page="alertsPage" type="button">
+          ✉　Alerts
+        </button>
         <button class="nav-item" data-page="profilePage" type="button">
           ◎　Profile
         </button>
@@ -148,6 +152,11 @@
           </section>
         </div>
 
+      </section>
+
+      <!-- ALERTS PAGE -->
+      <section id="alertsPage" class="page-view">
+        <div class="page-heading"><p class="eyebrow">COMMUNICATION</p><h1>Alerts & Notices</h1><p class="muted">Publish updates for students and drivers.</p></div>
         <section class="panel">
           <h2>Send message or alert</h2>
           <p class="muted">
@@ -350,17 +359,7 @@
         </div>
 
         <section class="panel map-panel">
-          <div id="managementMap" class="management-map">
-            <div class="map-message">
-              <div class="map-symbol">⌖</div>
-              <h2>Live bus map</h2>
-              <p class="muted">
-                Map display area. Connect your existing live-location/map code
-                to the #managementMap element. No Firebase location path has
-                been assumed.
-              </p>
-            </div>
-          </div>
+          <div id="managementMap" class="management-map"></div>
         </section>
       </section>
 
@@ -417,14 +416,18 @@
     </main>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <!-- KEEP THESE CONNECTIONS -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="firebase.js"></script>
   <script src="cloud-sync.js"></script>
   <script src="data.js"></script>
+  <script src="route-directions.js"></script>
   <script src="management.js"></script>
   <script src="management-navigation.js"></script>
+  <script src="management-live-map.js"></script>
 
 </body>
 </html>

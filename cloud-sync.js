@@ -27,14 +27,11 @@
     ref.on('value', function (snapshot) {
       const remote = snapshot.val();
       const local = localStorage.getItem(key);
-      if (remote === null) {
-        if (local !== null) {
-          ref.set(parse(local)).catch(function (error) {
-            console.error('[WIMB sync] Could not upload ' + key + ':', error);
-          });
-        }
-        return;
-      }
+      // Do not upload browser-local data just because the cloud node is empty.
+      // A phone may contain old data; uploading it here could overwrite a newer
+      // assignment created on the management computer. Initial data is seeded
+      // explicitly from the Management portal instead.
+      if (remote === null) return;
 
       const remoteText = JSON.stringify(remote);
       if (local !== remoteText) {
