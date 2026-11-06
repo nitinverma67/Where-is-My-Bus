@@ -1,62 +1,77 @@
-# Where Is My Bus — React + TypeScript starter
+# Where Is My Bus — Phase 2: Firebase live GPS
 
-This is the first migration foundation for the existing Where Is My Bus project. It includes Vite, React, TypeScript, Tailwind CSS v4, Google Maps, Firebase initialization, a device GPS watcher, and a GitHub Pages workflow.
+React + TypeScript + Vite + Google Maps + Firebase Realtime Database.
 
-## 1. Requirements
+## What Phase 2 adds
 
-- Node.js 22 or newer
-- npm
-- A newly created, HTTP-referrer-restricted Google Maps browser key
-- The existing Firebase project configuration (already represented in `.env.example`)
+- Driver enters a bus ID and starts GPS sharing from a phone/browser.
+- Device Geolocation API watches the actual device position.
+- Each position is published to `liveLocations/{BUS-ID}` in Firebase Realtime Database.
+- Student portal subscribes to the selected bus ID and receives location updates without refreshing.
+- Management portal subscribes to all bus locations and shows a live/offline fleet list.
+- The driver is marked offline when tracking is stopped; Firebase `onDisconnect` also marks it offline if the connection drops.
+- Anonymous Firebase Authentication is used silently for this development phase; no login screen is shown.
 
-## 2. Run locally
+## 1. Requirements and local setup
+
+Use Node.js 22+.
 
 ```bash
 npm install
-cp .env.example .env
 ```
 
-On Windows PowerShell, use:
+Copy `.env.example` to `.env` on Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Open `.env`, paste the NEW Google Maps browser key into `VITE_GOOGLE_MAPS_API_KEY`, then run:
+Add your NEW restricted Google Maps key to `VITE_GOOGLE_MAPS_API_KEY`. Keep `.env` out of Git; it is already ignored.
+
+Start the app:
 
 ```bash
 npm run dev
 ```
 
-Open the local URL printed by Vite, normally `http://localhost:5173`.
+## 2. Enable anonymous authentication
 
-## 3. GitHub Pages
+In Firebase Console → Authentication → Sign-in method → enable **Anonymous**.
 
-Repository: `https://github.com/nitinverma67/Where-Is-My-Bus`
+This creates a temporary Firebase identity for each browser/device without showing a login form. The portal role selector is only a development convenience; it is not real access control.
 
-1. Push this project to the repository's `main` branch.
-2. In GitHub, open Settings → Pages.
-3. Set Build and deployment source to **GitHub Actions**.
-4. In Settings → Secrets and variables → Actions, add repository secret `VITE_GOOGLE_MAPS_API_KEY` with the new restricted browser key.
-5. Add the Firebase values from `.env` as repository Actions variables with the same names (omit the `VITE_` prefix only if you also change the workflow; currently use the exact names shown in the workflow).
-6. Push to `main` or run the workflow manually.
+## 3. Apply Realtime Database rules
 
-The initial GitHub Pages URL will be `https://nitinverma67.github.io/Where-Is-My-Bus/`.
+Open Firebase Console → Realtime Database → Rules. Replace the rules with the contents of `database.rules.json`, then Publish.
 
-## 4. Custom domain later
+These rules require a signed-in Firebase session and validate coordinates. They are a development baseline only: any anonymous authenticated client can still read/write any bus ID. Before real deployment, Phase 3 must add proper accounts and enforce that each driver can write only their assigned bus, students can read only permitted routes, and management has authorized fleet access.
 
-When the domain is known and connected in GitHub Pages, change the workflow's `VITE_BASE_PATH` from `/Where-Is-My-Bus/` to `/`. Add the actual domain to the Google Maps website restrictions. Configure the domain in repository Settings → Pages before changing DNS. Follow GitHub's current DNS instructions for the domain registrar.
+Do not use unrestricted public `.read: true` / `.write: true` rules.
 
-## 5. Current starter limitations
+## 4. Test two devices
 
-- The map is a real Google Map once a valid key and billing-enabled Maps JavaScript API project are configured.
-- **Start device GPS** reads this browser/device's real geolocation and moves the map marker.
-- This initial starter does not yet broadcast GPS to other devices. The next implementation step is authenticated publishing/subscription through Firebase Realtime Database and matching database security rules.
-- The old portal's data and workflows are not yet migrated. Keep the old project unchanged until each feature is migrated and verified.
+1. Start the app on a phone or laptop that can provide location. Select **Driver portal**.
+2. Enter a shared bus ID such as `BUS-01` and click **Start live tracking**. Allow location permission. Keep the page open.
+3. Open the same deployed app or local app on another device/browser. Select **Student portal** and enter exactly `BUS-01`.
+4. The student map should move as Firebase receives driver GPS updates. No page refresh is required.
+5. Select **Management portal** to see all bus IDs that have reported GPS.
+6. Stop tracking on the driver device. The bus should show Offline.
 
-## 6. Build check
+For a local app opened on two devices on the same Wi-Fi, use the computer's LAN IP and Vite host mode (`npm run dev -- --host 0.0.0.0`). Browser geolocation requires a secure context: localhost is allowed, but a phone accessing an `http://192.168...` address may block GPS. Use HTTPS hosting or a secure tunnel for cross-device GPS tests.
+
+## 5. Build and deploy
 
 ```bash
 npm run typecheck
 npm run build
 ```
+
+For GitHub Actions, add the Google Maps key as a repository secret and the Firebase `VITE_FIREBASE_*` values as Actions variables as described in the existing deployment workflow. GitHub Pages is static hosting; Firebase provides the real-time backend.
+
+## 6. Known limits before production
+
+- No full account/login system yet; role switching is not secure.
+- Anonymous auth is only a bridge for development. Anyone can create an anonymous session.
+- Bus IDs are manually entered in this phase; Phase 3 will load assigned buses/routes from Firestore.
+- Browser GPS is reliable only while the page is active and permission is granted. Mobile OS/browser background limits may pause updates.
+- Firestore records, notices, pickup requests, route matching, push notifications and management CRUD are subsequent migration phases.

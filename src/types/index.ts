@@ -8,3 +8,8 @@ export interface DeviceLocation {
   speed: number | null
   updatedAt: number
 }
+
+export interface BusLocationRecord extends DeviceLocation {
+  busId: string
+  isActive: boolean
+}

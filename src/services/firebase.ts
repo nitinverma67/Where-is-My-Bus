@@ -1,4 +1,5 @@
 import { getApp, getApps, initializeApp } from 'firebase/app'
+import { getAuth, onAuthStateChanged, signInAnonymously, type User } from 'firebase/auth'
 import { getDatabase } from 'firebase/database'
 import { getFirestore } from 'firebase/firestore'
 
@@ -12,12 +13,40 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const isConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.databaseURL && firebaseConfig.projectId)
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.databaseURL && firebaseConfig.projectId && firebaseConfig.appId,
+)
 
-export const firebaseApp = isConfigured
+export const firebaseApp = isFirebaseConfigured
   ? (getApps().length ? getApp() : initializeApp(firebaseConfig))
   : null
 
 export const realtimeDatabase = firebaseApp ? getDatabase(firebaseApp) : null
 export const firestore = firebaseApp ? getFirestore(firebaseApp) : null
-export const isFirebaseConfigured = isConfigured
+
+/** Creates a quiet, temporary anonymous session; users do not see a login screen. */
+export async function ensureAnonymousSession(): Promise<User> {
+  if (!firebaseApp) throw new Error('Firebase is not configured. Check your .env file.')
+  const auth = getAuth(firebaseApp)
+  if (auth.currentUser) return auth.currentUser
+
+  return new Promise<User>((resolve, reject) => {
+    let unsubscribe: () => void = () => {}
+    unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe()
+      if (user) {
+        resolve(user)
+        return
+      }
+      try {
+        const credential = await signInAnonymously(auth)
+        resolve(credential.user)
+      } catch (error) {
+        reject(error)
+      }
+    }, (error) => {
+      unsubscribe()
+      reject(error)
+    })
+  })
+}
